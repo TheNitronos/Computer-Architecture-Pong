@@ -50,15 +50,15 @@ clear_leds:
 
 ; BEGIN:set_pixel
 set_pixel:
-	andi t0, a0, 0x0003 # save x modulo 4 in t0
-	slli t0, t0, 3 # multiply t0 by 8
-	add t0, t0, a1 # add y to previous value. t0 should now be the pixel index within the word
-	andi t1, a0, 0x000C # mask the x coord to keep only values 0, 4 and 8
-	addi t1, t1, LEDS # add the previous value to LEDS to find the correct LED word
-	ldw t3, 0(t1) # load the correct LED word in t3
+	andi t0, a0, 0x0003 ; save x modulo 4 in t0
+	slli t0, t0, 3 ; multiply t0 by 8
+	add t0, t0, a1 ; add y to previous value. t0 should now be the pixel index within the word
+	andi t1, a0, 0x000C ; mask the x coord to keep only values 0, 4 and 8
+	addi t1, t1, LEDS ; add the previous value to LEDS to find the correct LED word
+	ldw t3, 0(t1) ; load the correct LED word in t3
 	addi t2, zero, 0x0001
-	sll t2, t2, t0 # prepare a mask for the correct pixel index in t2
-	or t3, t3, t2 # set the correct pixel index to 1 via an or operation with t2
-	stw t3, 0(t1) # save the new word in the correct LED address
+	sll t2, t2, t0 ; prepare a mask for the correct pixel index in t2
+	or t3, t3, t2 ; set the correct pixel index to 1 via an or operation with t2
+	stw t3, 0(t1) ; save the new word in the correct LED address
 	ret
 ; END:set_pixel
