@@ -52,6 +52,7 @@ set_pixel:
 
 ; BEGIN:hit_test
 hit_test:
+	ret
 ; END:hit_test
 
 ; BEGIN:move_ball
