@@ -75,3 +75,8 @@ move_ball:
 	stw t1, BALL+4(zero) ; store new ball y position
 	ret
 ; END:move_ball
+
+; BEGIN:move_paddles
+move_paddles:
+	ret
+; END:move_paddles
