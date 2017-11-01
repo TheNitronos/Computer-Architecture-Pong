@@ -113,3 +113,20 @@ no_right_paddle_down:
 	stw t2, BUTTONS+4(zero) ; reset buttons edgecapture last 4 bits
 	ret
 ; END:move_paddles
+
+; BEGIN:draw_paddles
+draw_paddles:
+	addi sp, sp, -8 ; make room for 2 items on stack
+	stw a0, 4(sp) ; push a0 on stack
+	stw a1, 0(sp) ; push a1 on stack
+	ldw a1, PADDLES(zero) ; load the left paddle y coord in a1
+	addi a0, zero, 0 ; store the left paddle x coord in a0
+	call set_pixel ; draw the middle pixel of the left paddle
+	addi a1, a1, 1
+	call set_pixel ; draw the bottom pixel of the left paddle
+	addi a1, a1, -2
+	call set_pixel ; draw the top pixel of the left paddle
+	ldw a1, PADDLES+4(zero) ; load the right paddle y coord in a1
+	
+	ret
+; END:draw_paddles
