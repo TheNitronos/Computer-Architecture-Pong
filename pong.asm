@@ -8,17 +8,14 @@
 main:
 	addi t0, zero, 0x0005
 	addi t1, zero, 0x0001
+	addi t2, zero, -1
 	addi sp, zero, LEDS
 	stw t0, BALL(zero)
 	stw t0, BALL+4(zero)
-	stw t1, BALL+8(zero)
-	stw t1, BALL+8(zero)
+	stw zero, BALL+8(zero)
+	stw t2, BALL+12(zero)
 	stw t1, PADDLES(zero) ; left paddle should be at the top
 	stw t0, PADDLES+4(zero) ; right paddle should be 1 over the bottom
-paddles_loop:
-	call move_paddles
-	call clear_leds
-	call draw_paddles
 ball_loop:
 	call clear_leds
 	call move_ball
@@ -27,6 +24,10 @@ ball_loop:
 	call set_pixel
 	call hit_test
 	call ball_loop
+paddles_loop:
+	call move_paddles
+	call clear_leds
+	call draw_paddles
 	ret
 
 ; END:main
@@ -58,7 +59,34 @@ set_pixel:
 
 ; BEGIN:hit_test
 hit_test:
+	ldw t0, BALL(zero) 		; load the ball x position in t0
+	ldw t1, BALL+4(zero) 	; load the ball y position in t1
+	ldw t2, BALL+8(zero) 	; load the ball x velocity in t2
+	ldw t3, BALL+12(zero) ; load the ball y velocity in t3
+	addi t4, zero, 0 ; store the min x / min y in t4
+	addi t5, zero, 11 ; store the max x in t5
+	addi t6, zero, 7 ; store the max y in t6
+	addi t7, zero, -1 ; make an all 1 register for XOR operations
+	bne t1, t4, no_up_bounce ; if the ball is not at the top, no bounce
+	xor t3, t3, t7 ; invert all the bits of t3
+	addi t3, t3, 1 ; add 1 (this combined with the above operation inverts t3)
+no_up_bounce:
+	bne t1, t6, no_down_bounce ; if the ball is not at the bottom, no bounce
+	xor t3, t3, t7 ; invert all the bits of t3
+	addi t3, t3, 1 ; add 1 (this combined with the above operation inverts t3)
+no_down_bounce:
+	bne t0, t4, no_left_bounce ; if the ball is not at the left, no bounce
+	xor t2, t2, t7 ; invert all the bits of t2
+	addi t2, t2, 1 ; add 1 (this combined with the above operation inverts t2)
+no_left_bounce:
+	bne t0, t5, no_right_bounce ; if the ball is not at the right, no up bounce
+	xor t2, t2, t7 ; invert all the bits of t2
+	addi t2, t2, 1 ; add 1 (this combined with the above operation inverts t2)
+no_right_bounce:
+	stw t2, BALL+8(zero) ; save the new ball x velocity
+	stw t3, BALL+12(zero) ; save the new ball y velocity
 	ret
+
 ; END:hit_test
 
 ; BEGIN:move_ball
@@ -68,7 +96,7 @@ move_ball:
 	ldw t2, BALL+8(zero) 	; load the ball x velocity in t2
 	ldw t3, BALL+12(zero) ; load the ball y velocity in t3
 	add t0, t0, t2			 	; update x position
-	add t1, t1, t3 				; update y position
+	sub t1, t1, t3 				; update y position
 	stw t0, BALL(zero) 		; store new ball x position
 	stw t1, BALL+4(zero) 	; store new ball y position
 	ret
