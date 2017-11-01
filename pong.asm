@@ -78,5 +78,38 @@ move_ball:
 
 ; BEGIN:move_paddles
 move_paddles:
+	ldw t0, PADDLES(zero) ; load the left paddle y coord in t0
+	ldw t1, PADDLES+4(zero) ; load the right paddle y coord in t1
+	ldw t2, BUTTONS+4(zero) ; load the buttons edgecapture in t2
+	addi t4, zero, 1 ; minimum y coord
+	addi t5, zero, 6 ; maximum y coord
+	andi t3, t2, 0x0001 ; mask to take only the last bit of t2 and store in t3 (this is left paddle up)
+	beq t3, zero, no_left_paddle_up ; if no input, we don't want the paddle to move 
+	beq t0, t4, no_left_paddle_up ; if the paddle is already at the top it doesn't go up
+	addi t0, t0, -1 ; make the left paddle go up
+no_left_paddle_up:
+	srli t2, t2, 1 ; shift buttons to the right to take the next button 
+	andi t3, t2, 0x0001 ; mask to take only the last bit of t2 and store in t3 (this is left paddle down)
+	beq t3, zero, no_left_paddle_down ; if no input, we don't want the paddle to move 
+	beq t0, t5, no_left_paddle_down ; if the paddle is already at the bottom it doesn't go down
+	addi t0, t0, 1 ; make the left paddle go down
+no_left_paddle_down:
+	srli t2, t2, 1 ; shift buttons to the right to take the next button 
+	andi t3, t2, 0x0001 ; mask to take only the last bit of t2 and store in t3 (this is right paddle up)
+	beq t3, zero, no_right_paddle_up ; if no input, we don't want the paddle to move 
+	beq t1, t4, no_right_paddle_up ; if the paddle is already at the top it doesn't go up
+	addi t1, t1, -1 ; make the right paddle go up
+no_right_paddle_up:
+	srli t2, t2, 1 ; shift buttons to the right to take the next button 
+	andi t3, t2, 0x0001 ; mask to take only the last bit of t2 and store in t3 (this is right paddle down)
+	beq t3, zero, no_right_paddle_down ; if no input, we don't want the paddle to move 
+	beq t1, t5, no_right_paddle_down ; if the paddle is already at the top it doesn't go up
+	addi t1, t1, 1 ; make the left paddle go down
+no_right_paddle_down:
+	stw t0, PADDLES(zero) ; store the new right paddle y coord
+	stw t1, PADDLES+4(zero) ; store the new left paddle y coord
+	srli t2, t2, 1
+	slli t2, t2, 4 ; replace the last 4 bits of buttons edgecapture with 0
+	stw t2, BUTTONS+4(zero) ; reset buttons edgecapture last 4 bits
 	ret
 ; END:move_paddles
