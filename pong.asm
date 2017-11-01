@@ -12,22 +12,20 @@ main:
 	addi sp, zero, LEDS
 	stw t0, BALL(zero)
 	stw t0, BALL+4(zero)
-	stw zero, BALL+8(zero)
+	stw t1, BALL+8(zero)
 	stw t2, BALL+12(zero)
 	stw t1, PADDLES(zero) ; left paddle should be at the top
 	stw t0, PADDLES+4(zero) ; right paddle should be 1 over the bottom
 ball_loop:
-	call clear_leds
+	call hit_test
 	call move_ball
+	call move_paddles
+	call clear_leds
 	ldw a0, BALL(zero)
 	ldw a1, BALL+4(zero)
 	call set_pixel
-	call hit_test
-	call ball_loop
-paddles_loop:
-	call move_paddles
-	call clear_leds
 	call draw_paddles
+	call ball_loop
 	ret
 
 ; END:main
@@ -63,11 +61,62 @@ hit_test:
 	ldw t1, BALL+4(zero) 	; load the ball y position in t1
 	ldw t2, BALL+8(zero) 	; load the ball x velocity in t2
 	ldw t3, BALL+12(zero) ; load the ball y velocity in t3
-	addi t4, zero, 0 ; store the min x / min y in t4
+	addi v0, zero, 0 ; set v0 to 0 (default value)
+left:
+	addi t4, zero, 1 ; store the x coord where left goals may happen in t4 (x=1)
+	bne t0, t4, right ; if x is not 1, no risk of a left goal
+	beq t2, t4, right ; if the x velocity is positive, no risk of a left goal
+	ldw t4, PADDLES(zero) ; load the left paddle middle y coord in t4
+	addi t5, t4, 1 ; left paddle bottom y coord in t5
+	addi t6, t4, -1 ; left paddle top y coord in t6
+	add t7, t1, t3 ; t7 is the virtual next ball y position
+	beq t7, t4, no_left_goal
+	beq t7, t5, no_left_goal
+	beq t7, t6, no_left_goal ; if the virtual next ball y position is in the paddle, no goal
+	addi v0, zero, 2 ; else, goal for player 2
+	jmpi walls
+no_left_goal:
+	beq t1, t4, invert_x
+	beq t1, t5, invert_x
+	beq t1, t6, invert_x ; if there is paddle to the left of the ball, invert only x velocity
+	beq t1, zero, invert_x
+	addi t7, zero, 7
+	beq t1, t7, invert_x ; if the ball is at the top or the bottom invert only x
+	jmpi invert_y
+right:
+	addi t4, zero, 10 ; store the x coord where left goals may happen in t4 (x=10)
+	bne t0, t4, walls ; if x is not 10, no risk of a right goal
+	addi t4, zero, -1
+	beq t2, t4, walls ; if the x velocity is negative, no risk of a right goal
+	ldw t4, PADDLES+4(zero) ; load the right paddle middle y coord in t4
+	addi t5, t4, 1 ; right paddle bottom y coord in t5
+	addi t6, t4, -1 ; right paddle top y coord in t6
+	add t7, t1, t3 ; t7 is the virtual next ball y position
+	beq t7, t4, no_right_goal
+	beq t7, t5, no_right_goal
+	beq t7, t6, no_right_goal ; if the virtual next ball y position is in the paddle, no goal
+	addi v0, zero, 1 ; else, goal for player 1
+	jmpi walls
+no_right_goal:
+	beq t1, t4, invert_x
+	beq t1, t5, invert_x
+	beq t1, t6, invert_x ; if there is paddle to the right of the ball, invert only x velocity
+	beq t1, zero, invert_x
+	addi t7, zero, 7
+	beq t1, t7, invert_x ; if the ball is at the top or the bottom invert only x
+invert_y:
+	addi t7, zero, -1 ; make a full 1 register for XOR inversions
+	xor t3, t3, t7 ; invert all the bits of t3
+	addi t3, t3, 1 ; add 1 (this combined with the above operation inverts t3)
+invert_x:
+	xor t2, t2, t7 ; invert all the bits of t2
+	addi t2, t2, 1 ; add 1 (this combined with the above operation inverts t2)
+	jmpi hit_end
+walls:
 	addi t5, zero, 11 ; store the max x in t5
 	addi t6, zero, 7 ; store the max y in t6
-	addi t7, zero, -1 ; make an all 1 register for XOR operations
-	bne t1, t4, no_up_bounce ; if the ball is not at the top, no bounce
+	addi t7, zero, -1 ; make a full 1 register for XOR inversions
+	bne t1, zero, no_up_bounce ; if the ball is not at the top, no bounce
 	xor t3, t3, t7 ; invert all the bits of t3
 	addi t3, t3, 1 ; add 1 (this combined with the above operation inverts t3)
 no_up_bounce:
@@ -75,7 +124,7 @@ no_up_bounce:
 	xor t3, t3, t7 ; invert all the bits of t3
 	addi t3, t3, 1 ; add 1 (this combined with the above operation inverts t3)
 no_down_bounce:
-	bne t0, t4, no_left_bounce ; if the ball is not at the left, no bounce
+	bne t0, zero, no_left_bounce ; if the ball is not at the left, no bounce
 	xor t2, t2, t7 ; invert all the bits of t2
 	addi t2, t2, 1 ; add 1 (this combined with the above operation inverts t2)
 no_left_bounce:
@@ -83,6 +132,7 @@ no_left_bounce:
 	xor t2, t2, t7 ; invert all the bits of t2
 	addi t2, t2, 1 ; add 1 (this combined with the above operation inverts t2)
 no_right_bounce:
+hit_end:
 	stw t2, BALL+8(zero) ; save the new ball x velocity
 	stw t3, BALL+12(zero) ; save the new ball y velocity
 	ret
@@ -96,7 +146,7 @@ move_ball:
 	ldw t2, BALL+8(zero) 	; load the ball x velocity in t2
 	ldw t3, BALL+12(zero) ; load the ball y velocity in t3
 	add t0, t0, t2			 	; update x position
-	sub t1, t1, t3 				; update y position
+	add t1, t1, t3 				; update y position
 	stw t0, BALL(zero) 		; store new ball x position
 	stw t1, BALL+4(zero) 	; store new ball y position
 	ret
@@ -148,7 +198,8 @@ no_right_paddle_down:
 
 ; BEGIN:draw_paddles
 draw_paddles:
-	addi sp, sp, -8 				; make room for 2 items on stack
+	addi sp, sp, -12 				; make room for 2 items on stack
+	stw ra, 8(sp) ; push ra on stack
 	stw a0, 4(sp) 					; push a0 on stack
 	stw a1, 0(sp) 					; push a1 on stack
 	ldw a1, PADDLES(zero) 	; load the left paddle y coord in a1
@@ -165,9 +216,10 @@ draw_paddles:
 	call set_pixel 					; draw the bottom pixel of the right paddle
 	addi a1, a1, -2
 	call set_pixel 					; draw the top pixel of the right paddle
+	ldw ra, 8(sp) ; preserve ra on call
 	ldw a0, 4(sp) 					; preserve a0 on call
 	ldw a1, 0(sp) 					; preserve a1 on call
-	addi sp, sp, 8 					; hand back stack space
+	addi sp, sp, 12				; hand back stack space
 	ret
 
 ; END:draw_paddles
