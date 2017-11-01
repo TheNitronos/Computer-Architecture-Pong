@@ -127,6 +127,14 @@ draw_paddles:
 	addi a1, a1, -2
 	call set_pixel ; draw the top pixel of the left paddle
 	ldw a1, PADDLES+4(zero) ; load the right paddle y coord in a1
-	
+	addi a0, zero, 11 ; store the right paddle x coord in a0
+	call set_pixel ; draw the middle pixel of the right paddle
+	addi a1, a1, 1
+	call set_pixel ; draw the bottom pixel of the right paddle
+	addi a1, a1, -2
+	call set_pixel ; draw the top pixel of the right paddle
+	ldw a0, 4(sp) ; preserve a0 on call
+	ldw a1, 0(sp) ; preserve a1 on call
+	addi sp, sp, 8 ; hand back stack space
 	ret
 ; END:draw_paddles
