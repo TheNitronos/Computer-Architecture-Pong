@@ -65,19 +65,29 @@ set_pixel:
 
 ; BEGIN:hit_test
 hit_test
-	lw t0, BALL					; store x-axis position in t0
-	beq t0, zero, hit_y ; hit y-axis left
-	beq t0, 11, hit_y		; hit y-axis right
-	add t0, t0, 4				; t0 now represents y-axis position
-	beq t0, zero, hit_x ; hit x-axis up
-	beq t0, 7, hit_y			; hit x-axis bottom
-	j move_ball	 					; then move the ball
+	ldw t1, BALL						; store x-axis position in t1
+	ldw t2, BALL(4)					; store y-axis position in t2
+	beq t1, zero, invert_y 	; hit y-axis left
+	beq t1, 11, invert_y		; hit y-axis right
+	beq t2, zero, invert_x 	; hit x-axis up
+	beq t2, 7, invert_x			; hit x-axis bottom
+	call move_ball	 				; then move the ball
 	ret
 
-hit_x:
+invert_x:
+	ldw t1, BALL(8)
+	not t2, t1
+	add t2, t2, 1
+	stw BALL(8), t2
 	ret
-hit_y:
+
+invert_y:
+	ldw t1, BALL(12)
+	not t2, t1
+	add t2, t2, 1
+	stw BALL(12), t2
 	ret
+
 ; END:hit_test
 
 ; BEGIN:move_ball
