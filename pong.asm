@@ -21,3 +21,25 @@ set_pixel:
 	add $t1, LEDS, $t1 		; add the previous value to LEDS to find the correct LED word
 	ret
 ; END:set_pixel
+
+; BEGIN:hit_test
+hit_test
+	lw $t0, BALL					; store x-axis position in $t0
+	beq $t0, $zero, hit_y ; hit y-axis left
+	beq $t0, 11, hit_y		; hit y-axis right
+	add $t0, $t0, 4				; $t0 now represents y-axis position
+	beq $t0, $zero, hit_x ; hit x-axis up
+	beq $t0, 7, hit_y			; hit x-axis bottom
+	j move_ball	 					; then move the ball
+	ret
+
+hit_x:
+	ret
+hit_y:
+	ret
+; END:hit_test
+
+; BEGIN:move_ball
+move_ball
+	ret
+; END:move_ball
