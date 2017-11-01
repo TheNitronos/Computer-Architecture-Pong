@@ -6,37 +6,20 @@
 
 ; BEGIN:main
 main:
+	addi t0, zero, 0x0005
+	addi t1, zero, 0x0001
+	stw t0, BALL(zero)
+	stw t0, BALL+4(zero)
+	stw t1, BALL+8(zero)
+	stw t1, BALL+8(zero)
+ball_loop:
 	call clear_leds
-	addi a0, zero, 0
-	addi a1, zero, 0
+	call move_ball
+	ldw a0, BALL(zero)
+	ldw a1, BALL+4(zero)
 	call set_pixel
-	addi a0, zero, 1
-	addi a1, zero, 2
-	call set_pixel
-	addi a0, zero, 2
-	addi a1, zero, 4
-	call set_pixel
-	addi a0, zero, 3
-	addi a1, zero, 6
-	call set_pixel
-	addi a0, zero, 4
-	addi a1, zero, 4
-	call set_pixel
-	addi a0, zero, 5
-	addi a1, zero, 5
-	call set_pixel
-	addi a0, zero, 6
-	addi a1, zero, 6
-	call set_pixel
-	addi a0, zero, 7
-	addi a1, zero, 7
-	call set_pixel
-	addi a0, zero, 8
-	addi a1, zero, 7
-	call set_pixel
-	addi a0, zero, 11
-	addi a1, zero, 7
-	call set_pixel
+	call hit_test
+	call ball_loop
 	ret
 ; END:main
 
@@ -91,6 +74,19 @@ invert_y:
 ; END:hit_test
 
 ; BEGIN:move_ball
-move_ball
+move_ball:
+	ldw t0, BALL(zero) ; load the ball x position in t0
+	ldw t1, BALL+4(zero) ; load the ball y position in t1
+	ldw t2, BALL+8(zero) ; load the ball x velocity in t2
+	ldw t3, BALL+12(zero) ; load the ball y velocity in t3
+	add t0, t0, t2 ; update x position
+	add t1, t1, t3 ; update y position
+	stw t0, BALL(zero) ; store new ball x position
+	stw t1, BALL+4(zero) ; store new ball y position
 	ret
 ; END:move_ball
+
+; BEGIN:move_paddles
+move_paddles:
+	ret
+; END:move_paddles
