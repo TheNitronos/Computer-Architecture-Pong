@@ -6,10 +6,10 @@
 
 ; BEGIN:main
 main:
+	addi sp, zero, LEDS
 	addi t0, zero, 0x0005
 	addi t1, zero, 0x0001
 	addi t2, zero, -1
-	addi sp, zero, LEDS
 	stw t0, BALL(zero)
 	stw t0, BALL+4(zero)
 	stw t1, BALL+8(zero)
@@ -198,7 +198,7 @@ no_right_paddle_down:
 
 ; BEGIN:draw_paddles
 draw_paddles:
-	addi sp, sp, -12 				; make room for 2 items on stack
+	addi sp, sp, -12 				; make room for 3 items on stack
 	stw ra, 8(sp) ; push ra on stack
 	stw a0, 4(sp) 					; push a0 on stack
 	stw a1, 0(sp) 					; push a1 on stack
@@ -223,3 +223,92 @@ draw_paddles:
 	ret
 
 ; END:draw_paddles
+
+; BEGIN:display_score
+display_score:
+	addi sp, sp, -8 ;make room for 2 items on stack
+	stw ra, 4(sp) ; push ra on stack
+	stw a0, 0(sp) ; push a0 on stack
+	ldw a0, SCORES(zero) ; load left player score in a0
+	call get_font
+	stw v0, LEDS(zero) ; store left player score
+	ldw a0, SCORES+4(zero) ; load right player score in a0
+	call get_font
+	stw v0, LEDS+8(zero) ; store left player score
+	ldw t0, font_data+64(zero)
+	stw t0, LEDS+4(zero) ; store separator
+	ldw ra, 4(sp) ; preserve ra on call
+	ldw a0, 0(sp) ; preserve a0 on call
+	addi sp, sp, 8 ; hand back stack space
+	ret
+
+get_font:
+	addi t0, zero, 0
+	ldw v0, font_data(zero)
+	beq a0, t0, end ; 0
+	addi t0, t0, 1
+	ldw v0, font_data+4(zero)
+	beq a0, t0, end ; 1
+	addi t0, t0, 1
+	ldw v0, font_data+8(zero)
+	beq a0, t0, end ; 2
+	addi t0, t0, 1
+	ldw v0, font_data+12(zero)
+	beq a0, t0, end ; 3
+	addi t0, t0, 1
+	ldw v0, font_data+16(zero)
+	beq a0, t0, end ; 4
+	addi t0, t0, 1
+	ldw v0, font_data+20(zero)
+	beq a0, t0, end ; 5
+	addi t0, t0, 1
+	ldw v0, font_data+24(zero)
+	beq a0, t0, end ; 6
+	addi t0, t0, 1
+	ldw v0, font_data+28(zero)
+	beq a0, t0, end ; 7
+	addi t0, t0, 1
+	ldw v0, font_data+32(zero)
+	beq a0, t0, end ; 8
+	addi t0, t0, 1
+	ldw v0, font_data+36(zero)
+	beq a0, t0, end ; 9
+	addi t0, t0, 1
+	ldw v0, font_data+40(zero)
+	beq a0, t0, end ; A
+	addi t0, t0, 1
+	ldw v0, font_data+44(zero)
+	beq a0, t0, end ; B
+	addi t0, t0, 1
+	ldw v0, font_data+48(zero)
+	beq a0, t0, end ; C
+	addi t0, t0, 1
+	ldw v0, font_data+52(zero)
+	beq a0, t0, end ; D
+	addi t0, t0, 1
+	ldw v0, font_data+56(zero)
+	beq a0, t0, end ; E
+	addi t0, t0, 1
+	ldw v0, font_data+60(zero) ; F
+end:
+	ret
+; END:display_score
+
+font_data:
+.word 0x7E427E00 ; 0
+.word 0x407E4400 ; 1
+.word 0x4E4A7A00 ; 2
+.word 0x7E4A4200 ; 3
+.word 0x7E080E00 ; 4
+.word 0x7A4A4E00 ; 5
+.word 0x7A4A7E00 ; 6
+.word 0x7E020600 ; 7
+.word 0x7E4A7E00 ; 8
+.word 0x7E4A4E00 ; 9
+.word 0x7E127E00 ; A
+.word 0x344A7E00 ; B
+.word 0x42423C00 ; C
+.word 0x3C427E00 ; D
+.word 0x424A7E00 ; E
+.word 0x020A7E00 ; F
+.word 0x00181800 ; separator
