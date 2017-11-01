@@ -81,6 +81,14 @@ hit_y:
 ; END:hit_test
 
 ; BEGIN:move_ball
-move_ball
+move_ball:
+	ldw t0, BALL(zero) ; load the ball x position in t0
+	ldw t1, BALL+4(zero) ; load the ball y position in t1
+	ldw t2, BALL+8(zero) ; load the ball x velocity in t2
+	ldw t3, BALL+12(zero) ; load the ball y velocity in t3
+	add t0, t0, t2 ; update x position
+	add t1, t1, t3 ; update y position
+	stw t0, BALL(zero) ; store new ball x position
+	stw t1, BALL+4(zero) ; store new ball y position
 	ret
 ; END:move_ball
