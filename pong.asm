@@ -8,10 +8,17 @@
 main:
 	addi t0, zero, 0x0005
 	addi t1, zero, 0x0001
+	addi sp, zero, LEDS
 	stw t0, BALL(zero)
 	stw t0, BALL+4(zero)
 	stw t1, BALL+8(zero)
 	stw t1, BALL+8(zero)
+	stw t1, PADDLES(zero) ; left paddle should be at the top
+	stw t0, PADDLES+4(zero) ; right paddle should be 1 over the bottom
+paddles_loop:
+	call move_paddles
+	call clear_leds
+	call draw_paddles
 ball_loop:
 	call clear_leds
 	call move_ball
