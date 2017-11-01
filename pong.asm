@@ -59,7 +59,6 @@ set_pixel:
 ; BEGIN:hit_test
 hit_test:
 	ret
-
 ; END:hit_test
 
 ; BEGIN:move_ball
@@ -113,24 +112,24 @@ no_right_paddle_down:
 	stw t0, PADDLES(zero) 							; store the new right paddle y coord
 	stw t1, PADDLES+4(zero) 						; store the new left paddle y coord
 	srli t2, t2, 1
-	slli t2, t2, 4 					; replace the last 4 bits of buttons edgecapture with 0
-	stw t2, BUTTONS+4(zero) ; reset buttons edgecapture last 4 bits
+	slli t2, t2, 4 											; replace the last 4 bits of buttons edgecapture with 0
+	stw t2, BUTTONS+4(zero) 						; reset buttons edgecapture last 4 bits
 	ret
 
 ; END:move_paddles
 
 ; BEGIN:draw_paddles
 draw_paddles:
-	addi sp, sp, -8 			; make room for 2 items on stack
-	stw a0, 4(sp) 				; push a0 on stack
-	stw a1, 0(sp) 				; push a1 on stack
-	ldw a1, PADDLES(zero) ; load the left paddle y coord in a1
-	addi a0, zero, 0 			; store the left paddle x coord in a0
-	call set_pixel 				; draw the middle pixel of the left paddle
+	addi sp, sp, -8 				; make room for 2 items on stack
+	stw a0, 4(sp) 					; push a0 on stack
+	stw a1, 0(sp) 					; push a1 on stack
+	ldw a1, PADDLES(zero) 	; load the left paddle y coord in a1
+	addi a0, zero, 0 				; store the left paddle x coord in a0
+	call set_pixel 					; draw the middle pixel of the left paddle
 	addi a1, a1, 1
-	call set_pixel 				; draw the bottom pixel of the left paddle
+	call set_pixel 					; draw the bottom pixel of the left paddle
 	addi a1, a1, -2
-	call set_pixel 				; draw the top pixel of the left paddle
+	call set_pixel 					; draw the top pixel of the left paddle
 	ldw a1, PADDLES+4(zero) ; load the right paddle y coord in a1
 	addi a0, zero, 11 			; store the right paddle x coord in a0
 	call set_pixel 					; draw the middle pixel of the right paddle
