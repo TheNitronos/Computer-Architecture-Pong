@@ -319,10 +319,11 @@ font_end:
 ; END:display_score
 
 wait:
-	addi t0, zero, -1
+	addi t0, zero, 1
+	slli t0, t0, 26
 loop:
 	addi t0, t0, -1
-	beq t0, zero, end_loop
+	bne t0, zero, loop
 end_loop:
 	ret
 
