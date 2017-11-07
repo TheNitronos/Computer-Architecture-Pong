@@ -31,6 +31,7 @@ ball_loop:
 	addi t0, t0, 1
 	stw t0, SCORES(zero) ; else increase his score by 1
 	call display_score ; display the score
+	;call wait_long
 	jmpi main ; and restart the game
 no_score_update_left:
 	addi t0, zero, 2
@@ -39,6 +40,7 @@ no_score_update_left:
 	addi t0, t0, 1
 	stw t0, SCORES+4(zero) ; else increase his score by 1
 	call display_score ; display the score
+	;call wait_long
 	jmpi main ; and restart the game
 no_score_update_right:
 	call move_ball
@@ -48,6 +50,7 @@ no_score_update_right:
 	ldw a1, BALL+4(zero)
 	call set_pixel
 	call draw_paddles
+	;call wait
 	call ball_loop
 main_end:
 	ret
@@ -315,6 +318,24 @@ font_end:
 	ret
 
 ; END:display_score
+
+wait:
+	addi t0, zero, 1
+	slli t0, t0, 21
+loop:
+	addi t0, t0, -1
+	bne t0, zero, loop
+end_loop:
+	ret
+
+wait_long:
+	addi t0, zero, 1
+	slli t0, t0, 29
+loop_long:
+	addi t0, t0, -1
+	bne t0, zero, loop_long
+end_loop_long:
+	ret
 
 font_data:
 .word 0x7E427E00 ; 0
