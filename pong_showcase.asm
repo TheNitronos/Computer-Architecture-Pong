@@ -330,7 +330,7 @@ end_loop:
 
 wait_long:
 	addi t0, zero, 1
-	slli t0, t0, 29
+	slli t0, t0, 23
 loop_long:
 	addi t0, t0, -1
 	bne t0, zero, loop_long
