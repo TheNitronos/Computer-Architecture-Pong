@@ -31,7 +31,7 @@ ball_loop:
 	addi t0, t0, 1
 	stw t0, SCORES(zero) ; else increase his score by 1
 	call display_score ; display the score
-	;call wait_long
+	call wait_long
 	jmpi main ; and restart the game
 no_score_update_left:
 	addi t0, zero, 2
@@ -40,7 +40,7 @@ no_score_update_left:
 	addi t0, t0, 1
 	stw t0, SCORES+4(zero) ; else increase his score by 1
 	call display_score ; display the score
-	;call wait_long
+	call wait_long
 	jmpi main ; and restart the game
 no_score_update_right:
 	call move_ball
@@ -50,7 +50,7 @@ no_score_update_right:
 	ldw a1, BALL+4(zero)
 	call set_pixel
 	call draw_paddles
-	;call wait
+	call wait
 	call ball_loop
 main_end:
 	ret
