@@ -19,8 +19,10 @@ main:
 	stw t0, BALL+4(zero)
 	stw t1, BALL+8(zero)
 	stw t2, BALL+12(zero)
-	stw t1, PADDLES(zero) ; left paddle should be at the top
-	stw t0, PADDLES+4(zero) ; right paddle should be 1 over the bottom
+	addi t0, zero, 3
+	stw t0, PADDLES(zero) ; left paddle at y = 3
+	addi t0, zero, 2
+	stw t0, PADDLES+4(zero) ; right paddle at y = 2
 ball_loop:
 	call hit_test
 	addi t0, zero, 1
@@ -29,6 +31,7 @@ ball_loop:
 	addi t0, t0, 1
 	stw t0, SCORES(zero) ; else increase his score by 1
 	call display_score ; display the score
+	;call wait_long
 	jmpi main ; and restart the game
 no_score_update_left:
 	addi t0, zero, 2
@@ -37,6 +40,7 @@ no_score_update_left:
 	addi t0, t0, 1
 	stw t0, SCORES+4(zero) ; else increase his score by 1
 	call display_score ; display the score
+	;call wait_long
 	jmpi main ; and restart the game
 no_score_update_right:
 	call move_ball
@@ -46,7 +50,7 @@ no_score_update_right:
 	ldw a1, BALL+4(zero)
 	call set_pixel
 	call draw_paddles
-	call wait
+	;call wait
 	call ball_loop
 main_end:
 	ret
@@ -320,13 +324,21 @@ font_end:
 
 wait:
 	addi t0, zero, 1
-	slli t0, t0, 26
+	slli t0, t0, 21
 loop:
 	addi t0, t0, -1
 	bne t0, zero, loop
 end_loop:
 	ret
 
+wait_long:
+	addi t0, zero, 1
+	slli t0, t0, 29
+loop_long:
+	addi t0, t0, -1
+	bne t0, zero, loop_long
+end_loop_long:
+	ret
 
 font_data:
 .word 0x7E427E00 ; 0
