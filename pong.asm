@@ -117,6 +117,9 @@ left:
 	beq t7, t4, no_left_goal
 	beq t7, t5, no_left_goal
 	beq t7, t6, no_left_goal ; if the virtual next ball y position is in the paddle, no goal
+	beq t1, t4, no_left_goal
+	beq t1, t5, no_left_goal
+	beq t1, t6, no_left_goal ; if the ball is right next to the paddle, no goal
 	addi v0, zero, 2 ; else, goal for player 2
 	jmpi hit_end
 no_left_goal:
@@ -139,6 +142,9 @@ right:
 	beq t7, t4, no_right_goal
 	beq t7, t5, no_right_goal
 	beq t7, t6, no_right_goal ; if the virtual next ball y position is in the paddle, no goal
+	beq t1, t4, no_right_goal
+	beq t1, t5, no_right_goal
+	beq t1, t6, no_right_goal ; if the ball is right next to the paddle, no goal
 	addi v0, zero, 1 ; else, goal for player 1
 	jmpi hit_end
 no_right_goal:
@@ -197,17 +203,17 @@ no_left_paddle_up:
 	addi t0, t0, 1 ; make the left paddle go down
 no_left_paddle_down:
 	srli t2, t2, 1 ; shift buttons to the right to take the next button
-	andi t3, t2, 0x0001 ; mask to take only the last bit of t2 and store in t3 (this is right paddle up)
-	beq t3, zero, no_right_paddle_up ; if no input, we don't want the paddle to move
-	beq t1, t4, no_right_paddle_up ; if the paddle is already at the top it doesn't go up
-	addi t1, t1, -1 ; make the right paddle go up
-no_right_paddle_up:
-	srli t2, t2, 1 ; shift buttons to the right to take the next button
 	andi t3, t2, 0x0001 ; mask to take only the last bit of t2 and store in t3 (this is right paddle down)
 	beq t3, zero, no_right_paddle_down ; if no input, we don't want the paddle to move
 	beq t1, t5, no_right_paddle_down ; if the paddle is already at the top it doesn't go up
 	addi t1, t1, 1 ; make the left paddle go down
 no_right_paddle_down:
+	srli t2, t2, 1 ; shift buttons to the right to take the next button
+	andi t3, t2, 0x0001 ; mask to take only the last bit of t2 and store in t3 (this is right paddle up)
+	beq t3, zero, no_right_paddle_up ; if no input, we don't want the paddle to move
+	beq t1, t4, no_right_paddle_up ; if the paddle is already at the top it doesn't go up
+	addi t1, t1, -1 ; make the right paddle go up
+no_right_paddle_up:
 	stw t0, PADDLES(zero) ; store the new right paddle y coord
 	stw t1, PADDLES+4(zero) ; store the new left paddle y coord
 	srli t2, t2, 1
